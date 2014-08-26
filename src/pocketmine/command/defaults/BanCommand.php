@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class BanCommand extends VanillaCommand{
@@ -52,9 +51,9 @@ class BanCommand extends VanillaCommand{
 		$name = array_shift($args);
 		$reason = implode(" ", $args);
 
-		Server::getInstance()->getNameBans()->addBan($name, $reason, null, $sender->getName());
+		$sender->getServer()->getNameBans()->addBan($name, $reason, null, $sender->getName());
 
-		if(($player = Server::getInstance()->getPlayerExact($name)) instanceof Player){
+		if(($player = $sender->getServer()->getPlayerExact($name)) instanceof Player){
 			$player->kick("Banned by admin.");
 		}
 

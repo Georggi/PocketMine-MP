@@ -22,17 +22,16 @@
 
 namespace pocketmine\event\plugin;
 
-use pocketmine\event\Event;
 use pocketmine\plugin\Plugin;
 
 
-class PluginDisableEvent extends Event{
+class PluginDisableEvent extends PluginEvent{
 	public static $handlerList = null;
 
 	/**
 	 * @param Plugin $plugin
 	 */
 	public function __construct(Plugin $plugin){
-		$this->plugin = $plugin;
+		parent::__construct($plugin);
 	}
 }

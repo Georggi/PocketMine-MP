@@ -26,7 +26,6 @@ use pocketmine\command\CommandSender;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class TeleportCommand extends VanillaCommand{
@@ -62,8 +61,16 @@ class TeleportCommand extends VanillaCommand{
 
 				return true;
 			}
+			if(count($args) === 1){
+				$target = $sender->getServer()->getPlayer($args[0]);
+				if($target === null){
+					$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[0]);
+
+					return true;
+				}
+			}
 		}else{
-			$target = Server::getInstance()->getPlayer($args[0]);
+			$target = $sender->getServer()->getPlayer($args[0]);
 			if($target === null){
 				$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[0]);
 
@@ -71,7 +78,7 @@ class TeleportCommand extends VanillaCommand{
 			}
 			if(count($args) === 2){
 				$origin = $target;
-				$target = Server::getInstance()->getPlayer($args[1]);
+				$target = $sender->getServer()->getPlayer($args[1]);
 				if($target === null){
 					$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[1]);
 
@@ -83,7 +90,7 @@ class TeleportCommand extends VanillaCommand{
 		if(count($args) < 3){
 			$pos = new Position($target->x, $target->y, $target->z, $target->getLevel());
 			$origin->teleport($pos);
-			Command::broadcastCommandMessage($sender, "Teleported " . $origin->getName() . " to " . $target->getName());
+			Command::broadcastCommandMessage($sender, "Teleported " . $origin->getDisplayName() . " to " . $target->getDisplayName());
 
 			return true;
 		}elseif($target->getLevel() !== null){
@@ -92,7 +99,7 @@ class TeleportCommand extends VanillaCommand{
 			$y = $this->getRelativeDouble($target->y, $sender, $args[$pos++], 0, 128);
 			$z = $this->getRelativeDouble($target->z, $sender, $args[$pos]);
 			$target->teleport(new Vector3($x, $y, $z));
-			Command::broadcastCommandMessage($sender, "Teleported " . $target->getName() . " to " . round($x, 2) . ", " . round($y, 2) . ", " . round($z, 2));
+			Command::broadcastCommandMessage($sender, "Teleported " . $target->getDisplayName() . " to " . round($x, 2) . ", " . round($y, 2) . ", " . round($z, 2));
 
 			return true;
 		}

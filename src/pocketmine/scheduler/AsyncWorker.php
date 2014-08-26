@@ -21,21 +21,14 @@
 
 namespace pocketmine\scheduler;
 
-class AsyncWorker extends \Worker{
-	public $path;
+use pocketmine\Worker;
 
-	public function start($options = PTHREADS_INHERIT_CLASSES){
-		$this->path = \pocketmine\PATH;
-
-		return parent::start($options & ~PTHREADS_INHERIT_CLASSES);
-	}
+class AsyncWorker extends Worker{
 
 	public function run(){
-		require($this->path . "src/spl/SplClassLoader.php");
-		$autoloader = new \SplClassLoader();
-		$autoloader->add("pocketmine", array(
-			$this->path . "src"
-		));
+		require(\pocketmine\PATH . "src/spl/ClassLoader.php");
+		$autoloader = new \BaseClassLoader();
+		$autoloader->addPath(\pocketmine\PATH . "src");
 		$autoloader->register(true);
 	}
 }

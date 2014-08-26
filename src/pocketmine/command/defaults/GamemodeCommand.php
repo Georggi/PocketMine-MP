@@ -55,13 +55,11 @@ class GamemodeCommand extends VanillaCommand{
 			$sender->sendMessage("Unknown game mode");
 
 			return true;
-			Server::getInstance()->setConfigInt("gamemode", $gameMode);
-			$sender->sendMessage("Default game mode set to " . strtolower(Server::getGamemodeString($gameMode)));
 		}
 
 		$target = $sender;
 		if(isset($args[1])){
-			$target = Server::getInstance()->getPlayer($args[1]);
+			$target = $sender->getServer()->getPlayer($args[1]);
 			if($target === null){
 				$sender->sendMessage("Can't find player " . $args[1]);
 

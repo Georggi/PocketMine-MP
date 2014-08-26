@@ -51,6 +51,7 @@ use pocketmine\command\defaults\StopCommand;
 use pocketmine\command\defaults\TeleportCommand;
 use pocketmine\command\defaults\TellCommand;
 use pocketmine\command\defaults\TimeCommand;
+use pocketmine\command\defaults\TimingsCommand;
 use pocketmine\command\defaults\VanillaCommand;
 use pocketmine\command\defaults\VersionCommand;
 use pocketmine\command\defaults\WhitelistCommand;
@@ -101,9 +102,11 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new SpawnpointCommand("spawnpoint"));
 		$this->register("pocketmine", new SetWorldSpawnCommand("setworldspawn"));
 		$this->register("pocketmine", new TeleportCommand("tp"));
+		$this->register("pocketmine", new TimeCommand("time"));
+		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
 
-		if($this->server->getConfigBoolean("debug.commands", false) === true){
+		if($this->server->getProperty("debug.commands", false) === true){
 			$this->register("pocketmine", new StatusCommand("status"));
 		}
 	}
@@ -147,7 +150,7 @@ class SimpleCommandMap implements CommandMap{
 			return false;
 		}
 
-		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() === $label){
+		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() !== null and $this->knownCommands[$label]->getLabel() === $label){
 			return false;
 		}
 
@@ -174,7 +177,9 @@ class SimpleCommandMap implements CommandMap{
 			return false;
 		}
 
+		$target->timings->startTiming();
 		$target->execute($sender, $sentCommandLabel, $args);
+		$target->timings->stopTiming();
 
 		return true;
 	}
@@ -207,7 +212,44 @@ class SimpleCommandMap implements CommandMap{
 	 * @return void
 	 */
 	public function registerServerAliases(){
-		//TODO
+		$values = $this->server->getCommandAliases();
+
+		foreach($values as $alias => $commandStrings){
+			if(strpos($alias, ":") !== false or strpos($alias, " ") !== false){
+				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains illegal characters");
+				continue;
+			}
+
+			$targets = [];
+
+			$bad = "";
+			foreach($commandStrings as $commandString){
+				$args = explode(" ", $commandString);
+				$command = $this->getCommand($args[0]);
+
+				if($command === null){
+					if(strlen($bad) > 0){
+						$bad .= ", ";
+					}
+					$bad .= $commandString;
+				}else{
+					$targets[] = $commandString;
+				}
+			}
+
+			if(strlen($bad) > 0){
+				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains commands that do not exist: " . $bad);
+				continue;
+			}
+
+			//These registered commands have absolute priority
+			if(count($targets) > 0){
+				$this->knownCommands[strtolower($alias)] = new FormattedCommandAlias(strtolower($alias), $targets);
+			}else{
+				unset($this->knownCommands[strtolower($alias)]);
+			}
+
+		}
 	}
 
 

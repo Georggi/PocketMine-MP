@@ -24,18 +24,8 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\Player;
-use pocketmine\Server;
 
 class Generic extends Block{
-
-	/**
-	 * @param int    $id
-	 * @param int    $meta
-	 * @param string $name
-	 */
-	public function __construct($id, $meta = 0, $name = "Unknown"){
-		parent::__construct($id, $meta, $name);
-	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		return $this->getLevel()->setBlock($this, $this, true, false, true);
@@ -59,7 +49,6 @@ class Generic extends Block{
 					"z" => $this->z + 0.5,
 					"Tile" => $this->id,
 				);
-				$server = Server::getInstance();
 				/*$this->getLevel()->setBlock($this, new Air(), false, false, true);
 				//TODO
 				//$e = $server->api->entity->add($this->getLevel(), ENTITY_FALLING, FALLING_SAND, $data);

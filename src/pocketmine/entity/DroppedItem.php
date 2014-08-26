@@ -21,6 +21,7 @@
 
 namespace pocketmine\entity;
 
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Byte;
@@ -67,11 +68,16 @@ class DroppedItem extends Entity{
 	public function onUpdate(){
 		$this->entityBaseTick();
 
+		if($this->closed !== false){
+			return false;
+		}
+
 		if($this->pickupDelay > 0 and $this->pickupDelay < 32767){ //Infinite delay
 			--$this->pickupDelay;
 		}
 
 		$this->motionY -= $this->gravity;
+
 		$this->inBlock = $this->checkObstruction($this->x, ($this->boundingBox->minY + $this->boundingBox->maxY) / 2, $this->z);
 		$this->move($this->motionX, $this->motionY, $this->motionZ);
 
@@ -105,11 +111,11 @@ class DroppedItem extends Entity{
 		return true;
 	}
 
-	public function attack($damage, $source = "generic"){
+	public function attack($damage, $source = EntityDamageEvent::CAUSE_MAGIC){
 
 	}
 
-	public function heal($amount, $source = "generic"){
+	public function heal($amount){
 
 	}
 
@@ -205,10 +211,9 @@ class DroppedItem extends Entity{
 		$player->dataPacket($pk);
 
 		$pk = new SetEntityMotionPacket;
-		$pk->eid = $this->getID();
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
+		$pk->entities = [
+			[$this->getID(), $this->motionX, $this->motionY, $this->motionZ]
+		];
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);

@@ -55,6 +55,7 @@ class Item{
 	const GOLD_ORE = 14;
 	const IRON_ORE = 15;
 	const COAL_ORE = 16;
+	const LOG = 17;
 	const WOOD = 17;
 	const TRUNK = 17;
 	const LEAVES = 18;
@@ -76,7 +77,7 @@ class Item{
 	const WOOL = 35;
 	const DANDELION = 37;
 	const ROSE = 38;
-	const CYAN_FLOWER = 38;
+	const POPPY = 38;
 	const BROWN_MUSHROOM = 39;
 	const RED_MUSHROOM = 40;
 	const GOLD_BLOCK = 41;
@@ -94,7 +95,7 @@ class Item{
 	const OBSIDIAN = 49;
 	const TORCH = 50;
 	const FIRE = 51;
-
+	const MONSTER_SPAWNER = 52;
 	const WOOD_STAIRS = 53;
 	const WOODEN_STAIRS = 53;
 	const OAK_WOOD_STAIRS = 53;
@@ -163,14 +164,20 @@ class Item{
 	const FENCE_GATE = 107;
 	const BRICK_STAIRS = 108;
 	const STONE_BRICK_STAIRS = 109;
+	const MYCELIUM = 110;
 
 	const NETHER_BRICKS = 112;
 	const NETHER_BRICK_BLOCK = 112;
 
 	const NETHER_BRICKS_STAIRS = 114;
 
-	const SANDSTONE_STAIRS = 128;
+	const END_PORTAL = 120;
+	const END_STONE = 121;
 
+	const SANDSTONE_STAIRS = 128;
+	const EMERALD_ORE = 129;
+
+	const EMERALD_BLOCK = 133;
 	const SPRUCE_WOOD_STAIRS = 134;
 	const SPRUCE_WOODEN_STAIRS = 134;
 	const BIRCH_WOOD_STAIRS = 135;
@@ -195,12 +202,25 @@ class Item{
 	const WOODEN_SLAB = 158;
 	const WOOD_SLABS = 158;
 	const WOODEN_SLABS = 158;
+	const STAINED_CLAY = 159;
+	const STAINED_HARDENED_CLAY = 159;
+
+	const LEAVES2 = 161;
+	const LEAVE2 = 161;
+	const WOOD2 = 162;
+	const TRUNK2 = 162;
+	const LOG2 = 162;
+	const ACACIA_WOOD_STAIRS = 163;
+	const ACACIA_WOODEN_STAIRS = 163;
+	const DARK_OAK_WOOD_STAIRS = 164;
+	const DARK_OAK_WOODEN_STAIRS = 164;
 
 	const HAY_BALE = 170;
 	const CARPET = 171;
-
+	const HARDENED_CLAY = 172;
 	const COAL_BLOCK = 173;
 
+	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
 	const GLOWING_OBSIDIAN = 246;
@@ -337,6 +357,8 @@ class Item{
 
 	const SPAWN_EGG = 383;
 
+	const EMERALD = 388;
+
 	const CARROT = 391;
 	const CARROTS = 391;
 	const POTATO = 392;
@@ -395,6 +417,7 @@ class Item{
 				self::BOWL => new Bowl(),
 				self::FEATHER => new Feather(),
 				self::BRICK => new Brick(),
+				self::IRON_SWORD => new IronSword(),
 				self::IRON_INGOT => new IronIngot(),
 				self::GOLD_INGOT => new GoldIngot(),
 				self::IRON_SHOVEL => new IronShovel(),
@@ -426,7 +449,7 @@ class Item{
 				self::BOW => new Bow(),
 			);
 			foreach(Block::$list as $id => $class){
-				self::$list[$id] = new ItemBlock($class);
+				self::$list[$id] = new ItemBlock(new $class);
 			}
 
 		}

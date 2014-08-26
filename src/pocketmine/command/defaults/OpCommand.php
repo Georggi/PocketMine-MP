@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class OpCommand extends VanillaCommand{
@@ -51,7 +50,7 @@ class OpCommand extends VanillaCommand{
 
 		$name = array_shift($args);
 
-		$player = Server::getInstance()->getOfflinePlayer($name);
+		$player = $sender->getServer()->getOfflinePlayer($name);
 		Command::broadcastCommandMessage($sender, "Opped " . $player->getName());
 		if($player instanceof Player){
 			$player->sendMessage("You are now op!");

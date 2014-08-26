@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class DeopCommand extends VanillaCommand{
@@ -51,7 +50,7 @@ class DeopCommand extends VanillaCommand{
 
 		$name = array_shift($args);
 
-		$player = Server::getInstance()->getOfflinePlayer($name);
+		$player = $sender->getServer()->getOfflinePlayer($name);
 		$player->setOp(false);
 		if($player instanceof Player){
 			$player->sendMessage(TextFormat::YELLOW . "You are no longer op!");

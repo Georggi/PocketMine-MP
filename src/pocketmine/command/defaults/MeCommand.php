@@ -23,7 +23,6 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class MeCommand extends VanillaCommand{
@@ -55,7 +54,7 @@ class MeCommand extends VanillaCommand{
 			$message .= $sender->getName();
 		}
 
-		Server::getInstance()->broadcastMessage($message . " " . implode(" ", $args));
+		$sender->getServer()->broadcastMessage($message . " " . implode(" ", $args));
 
 		return true;
 	}

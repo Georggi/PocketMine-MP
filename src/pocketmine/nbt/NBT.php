@@ -62,7 +62,7 @@ class NBT{
 
 	private $buffer;
 	private $offset;
-	private $endianness;
+	public $endianness;
 	private $data;
 
 	public function get($len){
@@ -73,12 +73,12 @@ class NBT{
 		}elseif($len === true){
 			return substr($this->buffer, $this->offset);
 		}
-		if($len > 1024){
+		if($len > 16){
 			return substr($this->buffer, ($this->offset += $len) - $len, $len);
 		}
 		$buffer = "";
 		for(; $len > 0; --$len, ++$this->offset){
-			$buffer .= @$this->buffer{$this->offset};
+			$buffer .= $this->buffer{$this->offset};
 		}
 
 		return $buffer;
@@ -121,7 +121,7 @@ class NBT{
 
 	public function writeCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7){
 		if(($write = $this->write()) !== false){
-			return zlib_encode($write, ZLIB_ENCODING_GZIP, $level);
+			return zlib_encode($write, $compression, $level);
 		}
 
 		return false;

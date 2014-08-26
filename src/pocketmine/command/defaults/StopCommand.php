@@ -23,7 +23,7 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\Server;
+
 
 class StopCommand extends VanillaCommand{
 
@@ -45,12 +45,12 @@ class StopCommand extends VanillaCommand{
 
 		$reason = implode(" ", $args);
 		if($reason !== ""){
-			foreach(Server::getInstance()->getOnlinePlayers() as $player){
+			foreach($sender->getServer()->getOnlinePlayers() as $player){
 				$player->kick($reason);
 			}
 		}
 
-		Server::getInstance()->shutdown();
+		$sender->getServer()->shutdown();
 
 		return true;
 	}

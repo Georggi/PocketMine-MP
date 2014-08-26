@@ -23,7 +23,6 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class ReloadCommand extends VanillaCommand{
@@ -44,7 +43,7 @@ class ReloadCommand extends VanillaCommand{
 
 		Command::broadcastCommandMessage($sender, TextFormat::YELLOW . "Reloading server...");
 
-		Server::getInstance()->reload();
+		$sender->getServer()->reload();
 		Command::broadcastCommandMessage($sender, TextFormat::GOLD . "Reload complete.");
 
 		return true;

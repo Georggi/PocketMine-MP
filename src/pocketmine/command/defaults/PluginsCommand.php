@@ -22,7 +22,6 @@
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class PluginsCommand extends VanillaCommand{
@@ -42,14 +41,14 @@ class PluginsCommand extends VanillaCommand{
 			return true;
 		}
 
-		$sender->sendMessage("Plugins " . $this->getPluginList());
+		$sender->sendMessage("Plugins " . $this->getPluginList($sender));
 
 		return true;
 	}
 
-	private function getPluginList(){
+	private function getPluginList(CommandSender $sender){
 		$list = "";
-		foreach(($plugins = Server::getInstance()->getPluginManager()->getPlugins()) as $plugin){
+		foreach(($plugins = $sender->getServer()->getPluginManager()->getPlugins()) as $plugin){
 			if(strlen($list) > 0){
 				$list .= TextFormat::WHITE . ", ";
 			}

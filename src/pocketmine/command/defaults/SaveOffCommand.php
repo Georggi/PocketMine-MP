@@ -23,7 +23,7 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\Server;
+
 
 class SaveOffCommand extends VanillaCommand{
 
@@ -41,7 +41,7 @@ class SaveOffCommand extends VanillaCommand{
 			return true;
 		}
 
-		foreach(Server::getInstance()->getLevels() as $level){
+		foreach($sender->getServer()->getLevels() as $level){
 			$level->setAutoSave(false);
 		}
 

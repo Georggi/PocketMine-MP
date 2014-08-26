@@ -21,6 +21,8 @@
 
 namespace pocketmine\scheduler;
 
+use pocketmine\Server;
+
 /**
  * Class used to run async tasks in other threads.
  *
@@ -28,17 +30,27 @@ namespace pocketmine\scheduler;
  */
 abstract class AsyncTask extends \Threaded{
 
-	private $complete;
-	private $finished;
-	private $result;
+	protected $complete = null;
+	protected $finished = null;
+	protected $result = null;
+	protected $taskId = null;
 
 	public function run(){
-		$this->lock();
+		$this->finished = false;
+		$this->complete = false;
 		$this->result = null;
+
 		$this->onRun();
+
 		$this->finished = true;
-		$this->complete = $this->result === null ? true : false;
-		$this->unlock();
+
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isFinished(){
+		return $this->finished === true;
 	}
 
 	/**
@@ -48,15 +60,15 @@ abstract class AsyncTask extends \Threaded{
 		return $this->complete === true;
 	}
 
+	public function setCompleted(){
+		$this->complete = true;
+	}
+
 	/**
 	 * @return mixed
 	 */
 	public function getResult(){
-		return $this->synchronized(function (){
-			$this->finished = true;
-
-			return @unserialize($this->result);
-		});
+		return @unserialize($this->result);
 	}
 
 	/**
@@ -73,11 +85,12 @@ abstract class AsyncTask extends \Threaded{
 		$this->result = @serialize($result);
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isFinished(){
-		return $this->finished === true;
+	public function setTaskId($taskId){
+		$this->taskId = $taskId;
+	}
+
+	public function getTaskId(){
+		return $this->taskId;
 	}
 
 	/**
@@ -86,5 +99,17 @@ abstract class AsyncTask extends \Threaded{
 	 * @return void
 	 */
 	public abstract function onRun();
+
+	/**
+	 * Actions to execute when completed (on main thread)
+	 * Implement this if you want to handle the data in your AsyncTask after it has been processed
+	 *
+	 * @param Server $server
+	 *
+	 * @return void
+	 */
+	public function onCompletion(Server $server){
+
+	}
 
 }

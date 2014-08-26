@@ -22,8 +22,7 @@
 namespace pocketmine\level\generator\object;
 
 use pocketmine\block\Sapling;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3 as Vector3;
+use pocketmine\level\ChunkManager;
 use pocketmine\utils\Random;
 
 class Tree{
@@ -36,7 +35,7 @@ class Tree{
 		18 => true,
 	);
 
-	public static function growTree(Level $level, Vector3 $pos, Random $random, $type = 0){
+	public static function growTree(ChunkManager $level, $x, $y, $z, Random $random, $type = 0){
 		switch($type & 0x03){
 			case Sapling::SPRUCE:
 				if($random->nextRange(0, 1) === 1){
@@ -62,8 +61,8 @@ class Tree{
 				//}
 				break;
 		}
-		if($tree->canPlaceObject($level, $pos, $random)){
-			$tree->placeObject($level, $pos, $random);
+		if($tree->canPlaceObject($level, $x, $y, $z, $random)){
+			$tree->placeObject($level, $x, $y, $z, $random);
 		}
 	}
 }

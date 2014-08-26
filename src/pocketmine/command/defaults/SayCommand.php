@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\CommandSender;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class SayCommand extends VanillaCommand{
@@ -58,7 +57,7 @@ class SayCommand extends VanillaCommand{
 			$message .= $sender->getName();
 		}
 		$message .= TextFormat::LIGHT_PURPLE . "] " . implode(" ", $args);
-		Server::getInstance()->broadcastMessage($message);
+		$sender->getServer()->broadcastMessage($message);
 
 		return true;
 	}

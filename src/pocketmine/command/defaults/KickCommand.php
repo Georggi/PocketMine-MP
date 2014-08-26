@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class KickCommand extends VanillaCommand{
@@ -52,17 +51,17 @@ class KickCommand extends VanillaCommand{
 		$name = array_shift($args);
 		$reason = trim(implode(" ", $args));
 
-		if($reason === ""){
-			$reason = "Kicked by an operator.";
-		}
-
-		if(($player = Server::getInstance()->getPlayer($name)) instanceof Player){
-			$player->kick("Banned by admin.");
+		if(($player = $sender->getServer()->getPlayer($name)) instanceof Player){
+			$player->kick($reason);
+			if(strlen($reason) >= 1){
+				Command::broadcastCommandMessage($sender, "Kicked " . $player->getName() . " from the game: '{$reason}'");
+			}else{
+				Command::broadcastCommandMessage($sender, "Kicked " . $player->getName() . " from the game.");
+			}
 		}else{
 			$sender->sendMessage($name . " not found.");
 		}
 
-		Command::broadcastCommandMessage($sender, "Kicked player " . $name . ". With reason:\n" . $reason);
 
 		return true;
 	}

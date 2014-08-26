@@ -44,15 +44,15 @@ class AddEntityPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putInt($this->eid);
-		$this->putByte($this->type);
+		$this->putInt($this->type);
 		$this->putFloat($this->x);
 		$this->putFloat($this->y);
 		$this->putFloat($this->z);
 		$this->putInt($this->did);
 		if($this->did > 0){
-			$this->putShort($this->speedX);
-			$this->putShort($this->speedY);
-			$this->putShort($this->speedZ);
+			$this->putShort($this->speedX * 8000);
+			$this->putShort($this->speedY * 8000);
+			$this->putShort($this->speedZ * 8000);
 		}
 	}
 

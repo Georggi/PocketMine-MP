@@ -25,7 +25,6 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class GiveCommand extends VanillaCommand{
@@ -50,7 +49,7 @@ class GiveCommand extends VanillaCommand{
 			return false;
 		}
 
-		$player = Server::getInstance()->getPlayer($args[0]);
+		$player = $sender->getServer()->getPlayer($args[0]);
 		$item = Item::fromString($args[1]);
 
 		if(!isset($args[2])){

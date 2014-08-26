@@ -29,19 +29,23 @@ use pocketmine\block\Gravel;
 use pocketmine\block\IronOre;
 use pocketmine\block\LapisOre;
 use pocketmine\block\RedstoneOre;
+use pocketmine\item\Block;
 use pocketmine\level\generator\noise\Simplex;
 use pocketmine\level\generator\object\OreType;
 use pocketmine\level\generator\populator\Ore;
+use pocketmine\level\generator\populator\Populator;
 use pocketmine\level\generator\populator\TallGrass;
 use pocketmine\level\generator\populator\Tree;
-use pocketmine\level\Level;
 use pocketmine\math\Vector3 as Vector3;
 use pocketmine\utils\Random;
 
 class Normal extends Generator{
 
+	/** @var Populator[] */
 	private $populators = [];
+	/** @var GenerationChunkManager */
 	private $level;
+	/** @var Random */
 	private $random;
 	private $worldHeight = 65;
 	private $waterHeight = 63;
@@ -62,7 +66,7 @@ class Normal extends Generator{
 		return [];
 	}
 
-	public function init(Level $level, Random $random){
+	public function init(GenerationChunkManager $level, Random $random){
 		$this->level = $level;
 		$this->random = $random;
 		$this->random->setSeed($this->level->getSeed());
@@ -116,8 +120,9 @@ class Normal extends Generator{
 			}
 		}
 
+		$chunk = $this->level->getChunk($chunkX, $chunkZ);
+
 		for($chunkY = 0; $chunkY < 8; ++$chunkY){
-			$chunk = "";
 			$startY = $chunkY << 4;
 			$endY = $startY + 16;
 			for($z = 0; $z < 16; ++$z){
@@ -129,47 +134,44 @@ class Normal extends Generator{
 					for($y = $startY; $y < $endY; ++$y){
 						$diff = $height - $y;
 						if($y <= 4 and ($y === 0 or $this->random->nextFloat() < 0.75)){
-							$chunk .= "\x07"; //bedrock
+							$chunk->setBlockId($x, $y, $z, Block::BEDROCK);
 						}elseif($diff > 2){
-							$chunk .= "\x01"; //stone
+							$chunk->setBlockId($x, $y, $z, Block::STONE);
 						}elseif($diff > 0){
 							if($patches[$i] > 0.7){
-								$chunk .= "\x01"; //stone
+								$chunk->setBlockId($x, $y, $z, Block::STONE);
 							}elseif($patches[$i] < -0.8){
-								$chunk .= "\x0d"; //gravel
+								$chunk->setBlockId($x, $y, $z, Block::GRAVEL);
 							}else{
-								$chunk .= "\x03"; //dirt
+								$chunk->setBlockId($x, $y, $z, Block::DIRT);
 							}
 						}elseif($y <= $this->waterHeight){
 							if(($this->waterHeight - $y) <= 1 and $diff === 0){
-								$chunk .= "\x0c"; //sand
+								$chunk->setBlockId($x, $y, $z, Block::SAND);
 							}elseif($diff === 0){
 								if($patchesSmall[$i] > 0.3){
-									$chunk .= "\x0d"; //gravel
+									$chunk->setBlockId($x, $y, $z, Block::GRAVEL);
 								}elseif($patchesSmall[$i] < -0.45){
-									$chunk .= "\x0c"; //sand
+									$chunk->setBlockId($x, $y, $z, Block::SAND);
 								}else{
-									$chunk .= "\x03"; //dirt
+									$chunk->setBlockId($x, $y, $z, Block::DIRT);
 								}
 							}else{
-								$chunk .= "\x09"; //still_water
+								$chunk->setBlockId($x, $y, $z, Block::STILL_WATER);
 							}
 						}elseif($diff === 0){
 							if($patches[$i] > 0.7){
-								$chunk .= "\x01"; //stone
+								$chunk->setBlockId($x, $y, $z, Block::STONE);
 							}elseif($patches[$i] < -0.8){
-								$chunk .= "\x0d"; //gravel
+								$chunk->setBlockId($x, $y, $z, Block::GRAVEL);
 							}else{
-								$chunk .= "\x02"; //grass
+								$chunk->setBlockId($x, $y, $z, Block::GRASS);
 							}
-						}else{
-							$chunk .= "\x00";
 						}
 					}
-					$chunk .= "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+
 				}
 			}
-			$this->level->setMiniChunk($chunkX, $chunkZ, $chunkY, $chunk);
 		}
 
 	}

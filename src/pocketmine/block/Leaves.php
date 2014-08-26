@@ -30,6 +30,8 @@ class Leaves extends Transparent{
 	const SPRUCE = 1;
 	const BIRCH = 2;
 	const JUNGLE = 3;
+	const ACACIA = 0;
+	const DARK_OAK = 1;
 
 	public function __construct($meta = 0){
 		parent::__construct(self::LEAVES, $meta, "Leaves");

@@ -25,7 +25,6 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class SetWorldSpawnCommand extends VanillaCommand{
@@ -54,7 +53,7 @@ class SetWorldSpawnCommand extends VanillaCommand{
 				return true;
 			}
 		}elseif(count($args) === 3){
-			$level = Server::getInstance()->getDefaultLevel();
+			$level = $sender->getServer()->getDefaultLevel();
 			$pos = new Vector3($this->getInteger($sender, $args[0]), $this->getInteger($sender, $args[1]), $this->getInteger($sender, $args[2]));
 		}else{
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
@@ -62,7 +61,7 @@ class SetWorldSpawnCommand extends VanillaCommand{
 			return true;
 		}
 
-		$level->setSpawn($pos);
+		$level->setSpawnLocation($pos);
 
 		Command::broadcastCommandMessage($sender, "Set world " . $level->getName() . "'s spawnpoint to " . $pos->x . ", " . $pos->y . ", " . $pos->z);
 

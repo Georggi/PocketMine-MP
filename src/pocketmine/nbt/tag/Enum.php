@@ -24,7 +24,7 @@ namespace pocketmine\nbt\tag;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Enum as TagEnum;
 
-class Enum extends NamedTag implements \ArrayAccess{
+class Enum extends NamedTag implements \ArrayAccess, \Countable{
 
 	private $tagType;
 
@@ -33,6 +33,17 @@ class Enum extends NamedTag implements \ArrayAccess{
 		foreach($value as $k => $v){
 			$this->{$k} = $v;
 		}
+	}
+
+	public function &getValue(){
+		$value = [];
+		foreach($this as $k => $v){
+			if($v instanceof Tag){
+				$value[$k] = $v;
+			}
+		}
+
+		return $value;
 	}
 
 	public function offsetExists($offset){
@@ -61,6 +72,21 @@ class Enum extends NamedTag implements \ArrayAccess{
 
 	public function offsetUnset($offset){
 		unset($this->{$offset});
+	}
+
+	public function count($mode = COUNT_NORMAL){
+		for($i = 0; true; $i++){
+			if(!isset($this->{$i})){
+				return $i;
+			}
+			if($mode === COUNT_RECURSIVE){
+				if($this->{$i} instanceof \Countable){
+					$i += count($this->{$i});
+				}
+			}
+		}
+
+		return $i;
 	}
 
 	public function getType(){

@@ -83,7 +83,7 @@ class PlayerInventory extends BaseInventory{
 		if($item instanceof Item){
 			return $item;
 		}else{
-			return Item::get(Item::AIR);
+			return Item::get(Item::AIR, 0, 0);
 		}
 	}
 
@@ -259,6 +259,13 @@ class PlayerInventory extends BaseInventory{
 		return $armor;
 	}
 
+	public function clearAll(){
+		$limit = $this->getSize() + 4;
+		for($index = 0; $index < $limit; ++$index){
+			$this->clear($index);
+		}
+	}
+
 	/**
 	 * @param Player|Player[] $target
 	 */
@@ -319,11 +326,6 @@ class PlayerInventory extends BaseInventory{
 			$target = [$target];
 		}
 
-		$holder = $this->getHolder();
-		if($holder instanceof Player and ($holder->getGamemode() & 0x01) === 1){
-			return;
-		}
-
 		$pk = new ContainerSetContentPacket();
 		$pk->slots = [];
 		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
@@ -338,7 +340,7 @@ class PlayerInventory extends BaseInventory{
 					$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;
 				}
 			}
-			if(($id = $player->getWindowId($this)) === -1){
+			if(($id = $player->getWindowId($this)) === -1 or $player->spawned !== true){
 				$this->close($player);
 				continue;
 			}

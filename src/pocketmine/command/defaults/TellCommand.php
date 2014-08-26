@@ -23,7 +23,6 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class TellCommand extends VanillaCommand{
@@ -51,11 +50,11 @@ class TellCommand extends VanillaCommand{
 
 		$name = strtolower(array_shift($args));
 
-		$player = Server::getInstance()->getPlayer($name);
+		$player = $sender->getServer()->getPlayer($name);
 
 		if($player instanceof Player){
-			$sender->sendMessage("[me -> " . $player->getName() . "] " . implode($args));
-			$player->sendMessage("[" . $sender->getName() . " -> me] " . implode($args));
+			$sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
+			$player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
 		}else{
 			$sender->sendMessage("There's no player by that name online.");
 		}

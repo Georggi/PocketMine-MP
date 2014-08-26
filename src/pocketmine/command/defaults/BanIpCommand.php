@@ -24,7 +24,6 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class BanIpCommand extends VanillaCommand{
@@ -55,7 +54,7 @@ class BanIpCommand extends VanillaCommand{
 		if(preg_match("/^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$/", $value)){
 			$this->processIPBan($value, $sender, $reason);
 		}else{
-			if(($player = Server::getInstance()->getPlayer($value)) instanceof Player){
+			if(($player = $sender->getServer()->getPlayer($value)) instanceof Player){
 				$this->processIPBan($player->getAddress(), $sender, $reason);
 			}else{
 				$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
@@ -68,9 +67,9 @@ class BanIpCommand extends VanillaCommand{
 	}
 
 	private function processIPBan($ip, CommandSender $sender, $reason){
-		Server::getInstance()->getIPBans()->addBan($ip, $reason, null, $sender->getName());
+		$sender->getServer()->getIPBans()->addBan($ip, $reason, null, $sender->getName());
 
-		foreach(Server::getInstance()->getOnlinePlayers() as $player){
+		foreach($sender->getServer()->getOnlinePlayers() as $player){
 			if($player->getAddress() === $ip){
 				$player->kick("You have been IP banned.");
 			}

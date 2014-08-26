@@ -50,7 +50,7 @@ class Explosion{
 	private $what;
 
 	public function __construct(Position $center, $size, $what = null){
-		$this->level = $center->level;
+		$this->level = $center->getLevel();
 		$this->source = $center;
 		$this->size = max($size, 0);
 		$this->what = $what;
@@ -72,7 +72,7 @@ class Explosion{
 
 						for($blastForce = $this->size * (mt_rand(700, 1300) / 1000); $blastForce > 0; $blastForce -= $this->stepLen * 0.75){
 							$vBlock = $pointer->floor();
-							$blockID = $this->level->level->getBlockID($vBlock->x, $vBlock->y, $vBlock->z);
+							$blockID = $this->level->getBlockIdAt($vBlock->x, $vBlock->y, $vBlock->z);
 
 							if($blockID > 0){
 								$block = Block::get($blockID, 0);
@@ -138,7 +138,7 @@ class Explosion{
 					//$server->api->entity->drop(new Position($block->x + 0.5, $block->y, $block->z + 0.5, $this->level), Item::get($block->getID(), $this->level->level->getBlockDamage($block->x, $block->y, $block->z)));
 				}
 			}
-			$this->level->level->setBlockID($block->x, $block->y, $block->z, 0);
+			$this->level->setBlockIdAt($block->x, $block->y, $block->z, 0);
 			$send[] = new Vector3($block->x - $source->x, $block->y - $source->y, $block->z - $source->z);
 		}
 		$pk = new ExplodePacket;
@@ -147,7 +147,7 @@ class Explosion{
 		$pk->z = $this->source->z;
 		$pk->radius = $this->size;
 		$pk->records = $send;
-		Server::getInstance()->broadcastPacket($this->level->getPlayers(), $pk);
+		Server::broadcastPacket($this->level->getPlayers(), $pk);
 
 	}
 }

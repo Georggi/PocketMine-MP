@@ -330,6 +330,11 @@ abstract class BaseInventory implements Inventory{
 		}
 	}
 
+	/**
+	 * @param Player $source
+	 *
+	 * @return Player[]
+	 */
 	public function getViewers($source = null){
 		$viewers = [];
 		foreach($this->viewers as $viewer){
@@ -392,7 +397,7 @@ abstract class BaseInventory implements Inventory{
 		}
 
 		foreach($target as $player){
-			if(($id = $player->getWindowId($this)) === -1){
+			if(($id = $player->getWindowId($this)) === -1 or $player->spawned !== true){
 				$this->close($player);
 				continue;
 			}

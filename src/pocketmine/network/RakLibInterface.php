@@ -32,7 +32,6 @@ use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
 use pocketmine\network\protocol\ChatPacket;
-use pocketmine\network\protocol\ChunkDataPacket;
 use pocketmine\network\protocol\ContainerClosePacket;
 use pocketmine\network\protocol\ContainerOpenPacket;
 use pocketmine\network\protocol\ContainerSetContentPacket;
@@ -51,16 +50,13 @@ use pocketmine\network\protocol\LoginPacket;
 use pocketmine\network\protocol\LoginStatusPacket;
 use pocketmine\network\protocol\MessagePacket;
 use pocketmine\network\protocol\MoveEntityPacket;
-use pocketmine\network\protocol\MoveEntityPacket_PosRot;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayerArmorEquipmentPacket;
 use pocketmine\network\protocol\PlayerEquipmentPacket;
-use pocketmine\network\protocol\ReadyPacket;
 use pocketmine\network\protocol\RemoveBlockPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\RemovePlayerPacket;
-use pocketmine\network\protocol\RequestChunkPacket;
 use pocketmine\network\protocol\RespawnPacket;
 use pocketmine\network\protocol\RotateHeadPacket;
 use pocketmine\network\protocol\SendInventoryPacket;
@@ -73,10 +69,13 @@ use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\network\protocol\UnknownPacket;
+use pocketmine\network\protocol\UnloadChunkPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\UseItemPacket;
 use pocketmine\Player;
+use pocketmine\scheduler\CallbackTask;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
 use raklib\protocol\EncapsulatedPacket;
 use raklib\RakLib;
 use raklib\server\RakLibServer;
@@ -98,6 +97,11 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 	/** @var ServerHandler */
 	private $interface;
 
+	private $tickTask;
+
+	private $upload = 0;
+	private $download = 0;
+
 	public function __construct(Server $server){
 		$this->server = $server;
 		$this->identifers = new \SplObjectStorage();
@@ -105,11 +109,22 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 		$server = new RakLibServer($this->server->getLogger(), $this->server->getLoader(), $this->server->getPort(), $this->server->getIp() === "" ? "0.0.0.0" : $this->server->getIp());
 		$this->interface = new ServerHandler($server, $this);
 		$this->setName($this->server->getMotd());
+		$this->tickTask = $this->server->getScheduler()->scheduleRepeatingTask(new CallbackTask([$this, "doTick"]), 1);
+	}
 
+	public function doTick(){
+		$this->interface->sendTick();
 	}
 
 	public function process(){
-		$this->interface->handlePacket();
+		$work = false;
+		if($this->interface->handlePacket()){
+			$work = true;
+			while($this->interface->handlePacket()){
+			}
+		}
+
+		return $work;
 	}
 
 	public function closeSession($identifier, $reason){
@@ -118,7 +133,7 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 			$this->identifers->detach($player);
 			unset($this->players[$identifier]);
 			unset($this->identifiersACK[$identifier]);
-			$player->close($player->getName() . " has left the game", $reason);
+			$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $reason);
 		}
 	}
 
@@ -132,15 +147,17 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 	}
 
 	public function shutdown(){
+		$this->tickTask->cancel();
 		$this->interface->shutdown();
 	}
 
 	public function emergencyShutdown(){
+		$this->tickTask->cancel();
 		$this->interface->emergencyShutdown();
 	}
 
 	public function openSession($identifier, $address, $port, $clientID){
-		$player = new Player($this, $clientID, $address, $port);
+		$player = new Player($this, null, $address, $port);
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifers->attach($player, $identifier);
@@ -149,8 +166,18 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 
 	public function handleEncapsulated($identifier, EncapsulatedPacket $packet, $flags){
 		if(isset($this->players[$identifier])){
-			$this->players[$identifier]->handleDataPacket($this->getPacket($packet->buffer));
+			$pk = $this->getPacket($packet->buffer);
+			$pk->decode();
+			$this->players[$identifier]->handleDataPacket($pk);
 		}
+	}
+
+	public function handleRaw($address, $port, $payload){
+		$this->server->handlePacket($address, $port, $payload);
+	}
+
+	public function putRaw($address, $port, $payload){
+		$this->interface->sendRaw($address, $port, $payload);
 	}
 
 	public function notifyACK($identifier, $identifierACK){
@@ -163,8 +190,24 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 		$this->interface->sendOption("name", "MCCPP;Demo;$name");
 	}
 
+	public function setPortCheck($name){
+		$this->interface->sendOption("portChecking", (bool) $name);
+	}
+
 	public function handleOption($name, $value){
-		//TODO
+		if($name === "bandwidth"){
+			$v = unserialize($value);
+			$this->upload = $v["up"];
+			$this->download = $v["down"];
+		}
+	}
+
+	public function getUploadUsage(){
+		return $this->upload;
+	}
+
+	public function getDownloadUsage(){
+		return $this->download;
 	}
 
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
@@ -193,9 +236,6 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 				break;
 			case ProtocolInfo::LOGIN_STATUS_PACKET:
 				$data = new LoginStatusPacket();
-				break;
-			case ProtocolInfo::READY_PACKET:
-				$data = new ReadyPacket();
 				break;
 			case ProtocolInfo::MESSAGE_PACKET:
 				$data = new MessagePacket();
@@ -230,9 +270,6 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 			case ProtocolInfo::MOVE_ENTITY_PACKET:
 				$data = new MoveEntityPacket();
 				break;
-			case ProtocolInfo::MOVE_ENTITY_PACKET_POSROT:
-				$data = new MoveEntityPacket_PosRot();
-				break;
 			case ProtocolInfo::ROTATE_HEAD_PACKET:
 				$data = new RotateHeadPacket();
 				break;
@@ -259,12 +296,6 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 				break;
 			case ProtocolInfo::ENTITY_EVENT_PACKET:
 				$data = new EntityEventPacket();
-				break;
-			case ProtocolInfo::REQUEST_CHUNK_PACKET:
-				$data = new RequestChunkPacket();
-				break;
-			case ProtocolInfo::CHUNK_DATA_PACKET:
-				$data = new ChunkDataPacket();
 				break;
 			case ProtocolInfo::PLAYER_EQUIPMENT_PACKET:
 				$data = new PlayerEquipmentPacket();
@@ -331,6 +362,9 @@ class RakLibInterface implements ServerInstance, SourceInterface{
 				break;
 			case ProtocolInfo::ENTITY_DATA_PACKET:
 				$data = new EntityDataPacket();
+				break;
+			case ProtocolInfo::UNLOAD_CHUNK_PACKET:
+				$data = new UnloadChunkPacket();
 				break;
 			default:
 				$data = new UnknownPacket();

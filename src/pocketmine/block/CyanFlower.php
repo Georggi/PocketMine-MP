@@ -27,9 +27,14 @@ use pocketmine\Player;
 
 class CyanFlower extends Flowable{
 	public function __construct(){
-		parent::__construct(self::CYAN_FLOWER, 0, "Cyan Flower");
+		parent::__construct(self::POPPY, 0, "Cyan Flower");
 		$this->hardness = 0;
 	}
+
+	public function getBoundingBox(){
+		return null;
+	}
+
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);

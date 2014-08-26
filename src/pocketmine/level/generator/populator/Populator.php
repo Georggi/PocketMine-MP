@@ -24,9 +24,9 @@
  */
 namespace pocketmine\level\generator\populator;
 
-use pocketmine\level\Level;
+use pocketmine\level\ChunkManager;
 use pocketmine\utils\Random;
 
 abstract class Populator{
-	public abstract function populate(Level $level, $chunkX, $chunkZ, Random $random);
+	public abstract function populate(ChunkManager $level, $chunkX, $chunkZ, Random $random);
 }

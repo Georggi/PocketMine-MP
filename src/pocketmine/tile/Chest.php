@@ -25,7 +25,7 @@ use pocketmine\inventory\ChestInventory;
 use pocketmine\inventory\DoubleChestInventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
+use pocketmine\level\format\FullChunk;
 use pocketmine\math\Vector3 as Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Byte;
@@ -34,8 +34,6 @@ use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\Int;
 use pocketmine\nbt\tag\Short;
 use pocketmine\nbt\tag\String;
-use pocketmine\network\protocol\EntityDataPacket;
-use pocketmine\Player;
 
 class Chest extends Spawnable implements InventoryHolder, Container{
 
@@ -44,10 +42,16 @@ class Chest extends Spawnable implements InventoryHolder, Container{
 	/** @var DoubleChestInventory */
 	protected $doubleInventory = null;
 
-	public function __construct(Level $level, Compound $nbt){
+	public function __construct(FullChunk $chunk, Compound $nbt){
 		$nbt["id"] = Tile::CHEST;
-		parent::__construct($level, $nbt);
+		parent::__construct($chunk, $nbt);
 		$this->inventory = new ChestInventory($this);
+
+		if(!isset($this->namedtag->Items) or !($this->namedtag->Items instanceof Enum)){
+			$this->namedtag->Items = new Enum("Inventory", []);
+			$this->namedtag->Items->setTagType(NBT::TAG_Compound);
+		}
+
 		for($i = 0; $i < $this->getSize(); ++$i){
 			$this->inventory->setItem($i, $this->getItem($i));
 		}
@@ -220,37 +224,23 @@ class Chest extends Spawnable implements InventoryHolder, Container{
 		return true;
 	}
 
-	public function spawnTo(Player $player){
-		if($this->closed){
-			return false;
-		}
-
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+	public function getSpawnCompound(){
 		if($this->isPaired()){
-			$nbt->setData(new Compound("", array(
+			return new Compound("", array(
 				new String("id", Tile::CHEST),
 				new Int("x", (int) $this->x),
 				new Int("y", (int) $this->y),
 				new Int("z", (int) $this->z),
 				new Int("pairx", (int) $this->namedtag->pairx),
 				new Int("pairz", (int) $this->namedtag->pairz)
-			)));
+			));
 		}else{
-			$nbt->setData(new Compound("", array(
+			return new Compound("", array(
 				new String("id", Tile::CHEST),
 				new Int("x", (int) $this->x),
 				new Int("y", (int) $this->y),
 				new Int("z", (int) $this->z)
-			)));
+			));
 		}
-
-		$pk = new EntityDataPacket;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->namedtag = $nbt->write();
-		$player->dataPacket($pk);
-
-		return true;
 	}
 }

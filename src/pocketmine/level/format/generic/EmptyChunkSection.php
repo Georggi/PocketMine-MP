@@ -27,6 +27,17 @@ use pocketmine\level\format\ChunkSection;
  * Stub used to detect empty chunks
  */
 class EmptyChunkSection implements ChunkSection{
+
+	private $y;
+
+	public function __construct($y){
+		$this->y = $y;
+	}
+
+	final public function getY(){
+		return $this->y;
+	}
+
 	final public function getBlockId($x, $y, $z){
 		return 0;
 	}
@@ -39,8 +50,41 @@ class EmptyChunkSection implements ChunkSection{
 		return "\x00\x00\x00\x00\x00\x00\x00\x00";
 	}
 
-	final public function setBlockId($x, $y, $z, $id){
+	final public function getBlockSkyLightColumn($x, $z){
+		return "\xff\xff\xff\xff\xff\xff\xff\xff";
+	}
 
+	final public function getBlockLightColumn($x, $z){
+		return "\x00\x00\x00\x00\x00\x00\x00\x00";
+	}
+
+	final public function getBlock($x, $y, $z, &$id = null, &$meta = null){
+		$id = 0;
+		$meta = 0;
+	}
+
+	final public function setBlock($x, $y, $z, $id = null, $meta = null){
+		throw new \Exception("Tried to modify an empty Chunk");
+	}
+
+	public function getIdArray(){
+		return str_repeat("\x00", 4096);
+	}
+
+	public function getDataArray(){
+		return str_repeat("\x00", 2048);
+	}
+
+	public function getSkyLightArray(){
+		return str_repeat("\xff", 2048);
+	}
+
+	public function getLightArray(){
+		return str_repeat("\x00", 2048);
+	}
+
+	final public function setBlockId($x, $y, $z, $id){
+		throw new \Exception("Tried to modify an empty Chunk");
 	}
 
 	final public function getBlockData($x, $y, $z){
@@ -48,7 +92,7 @@ class EmptyChunkSection implements ChunkSection{
 	}
 
 	final public function setBlockData($x, $y, $z, $data){
-
+		throw new \Exception("Tried to modify an empty Chunk");
 	}
 
 	final public function getBlockLight($x, $y, $z){
@@ -56,7 +100,7 @@ class EmptyChunkSection implements ChunkSection{
 	}
 
 	final public function setBlockLight($x, $y, $z, $level){
-
+		throw new \Exception("Tried to modify an empty Chunk");
 	}
 
 	final public function getBlockSkyLight($x, $y, $z){
@@ -64,6 +108,6 @@ class EmptyChunkSection implements ChunkSection{
 	}
 
 	final public function setBlockSkyLight($x, $y, $z, $level){
-
+		throw new \Exception("Tried to modify an empty Chunk");
 	}
 }

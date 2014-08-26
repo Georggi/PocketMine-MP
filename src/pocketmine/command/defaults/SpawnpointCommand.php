@@ -25,7 +25,6 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\level\Position;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class SpawnpointCommand extends VanillaCommand{
@@ -55,7 +54,7 @@ class SpawnpointCommand extends VanillaCommand{
 				return true;
 			}
 		}else{
-			$target = Server::getInstance()->getPlayer($args[0]);
+			$target = $sender->getServer()->getPlayer($args[0]);
 			if($target === null){
 				$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[0]);
 
@@ -67,11 +66,12 @@ class SpawnpointCommand extends VanillaCommand{
 
 		if(count($args) === 4){
 			if($level !== null){
-				$x = (int) $this->getRelativeDouble($sender->x, $sender, $args[1]);
-				$y = (int) $this->getRelativeDouble($sender->y, $sender, $args[2], 0, 128);
-				$z = (int) $this->getRelativeDouble($sender->z, $sender, $args[3]);
+				$pos = $sender instanceof Player ? $sender->getPosition() : $level->getSpawn();
+				$x = (int) $this->getRelativeDouble($pos->x, $sender, $args[1]);
+				$y = $this->getRelativeDouble($pos->y, $sender, $args[2], 0, 128);
+				$z = $this->getRelativeDouble($pos->z, $sender, $args[3]);
 				$target->setSpawn(new Position($x, $y, $z, $level));
-				Command::broadcastCommandMessage($sender, "Set " . $target->getName() . "'s spawnpoint to " . $x . ", " . $y . ", " . $z);
+				Command::broadcastCommandMessage($sender, "Set " . $target->getDisplayName() . "'s spawnpoint to " . $x . ", " . $y . ", " . $z);
 
 				return true;
 			}
@@ -79,7 +79,7 @@ class SpawnpointCommand extends VanillaCommand{
 			if($sender instanceof Player){
 				$pos = new Position((int) $sender->x, (int) $sender->y, (int) $sender->z, $sender->getLevel());
 				$target->setSpawn($pos);
-				Command::broadcastCommandMessage($sender, "Set " . $target->getName() . "'s spawnpoint to " . $pos->x . ", " . $pos->y . ", " . $pos->z);
+				Command::broadcastCommandMessage($sender, "Set " . $target->getDisplayName() . "'s spawnpoint to " . $pos->x . ", " . $pos->y . ", " . $pos->z);
 
 				return true;
 			}else{
